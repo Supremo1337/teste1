@@ -1,6 +1,9 @@
 const express = require('express');
 
 const server = express();
+var cors = require('cors')
+
+server.use(cors())
 
 server.use(express.json()); // faz com que o express entenda JSON
 
@@ -75,4 +78,4 @@ server.delete('/users/:index', checkUserInArray, (req, res) => {
 }); // retorna os dados após exclusão
 
 
-server.listen(3003);
+server.listen(8000);
