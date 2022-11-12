@@ -1,10 +1,22 @@
 const router = require("express").Router();
+const { request, response } = require("express");
 const ficha = require("./models/ficha");
+const users = require("./models/users");
+const authmeController = require("./controllers/authController");
+router.use("/authme", authmeController);
+const projectController = require("./controllers/projectController");
+router.use("/", projectController);
 
-router.get("/users/:username", async (req, res) => {
-  let data = await ficha.findOne({ name: req.params.username });
-  if (!data) return res.status(400).json({ error: "Usuario não existe" });
-  return res.status(201).json(data);
+router.post("/auth/users", async (req, res) => {
+  const { email, password } = req.body;
+  let data = await users.findOne({ email: email });
+  if (data) {
+    if (data.password == password)
+      return res.status(200).json({ error: false, data });
+  } else
+    return res
+      .status(404)
+      .json({ error: true, message: "usuário não encontrado" });
 }); // rota para listar todos os users
 
 // router.get("/users/:index", checkUserInArray, (req, res) => {
@@ -12,19 +24,13 @@ router.get("/users/:username", async (req, res) => {
 // });
 
 router.post("/users", async (req, res) => {
-  console.log("ESSE É O REQ", req.body);
-  const { name, character, origin, role, race, divinity, level } = req.body; // assim esperamos buscar o name informado dentro do body da requisição
-    await ficha.create({
-      character: character,
-      name: name,
-      race: race,
-      origin: origin,
-      role: role,
-      divinity: divinity,
-      level: level,
-    });
-
-  return res.json(req.body); // retorna a informação da variavel users
+  const { email, password } = req.body;
+  let data = await users.findOne({ email: email });
+  if (!data) {
+    users.create({ email, password }).then((response) => console.log(response));
+    return res.status(201).json({ email }); // retorna a informação da variavel users
+  } else
+    return res.status(400).json({ error: true, message: "email ja em uso" });
 });
 
 router.put("/users/:index", (req, res) => {
