@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const users = new mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
   password: { type: String, required: true, select: false },
+  token: { type: String, default: '', required: false, select: false },
+  accountId: { type: String, default: '', required: false, select: false },
 });
 
 users.pre("save", async function (next) {

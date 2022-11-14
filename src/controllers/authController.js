@@ -1,8 +1,10 @@
 const router = require("express").Router();
 const users = require("../models/users");
+const ficha = require("../models/ficha");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth.json");
+//const authMiddleware = require("../middlewares/auth");
 
 router.post("/register", async (req, res) => {
   const { email } = req.body;
@@ -30,6 +32,14 @@ function generateToken(user = {}) {
   });
 }
 
+router.get("/users", async (req, res) => {
+  console.log(req.query.token)
+  const user = await users.findOne({ token: req.query.token.replace('"', "").replace('"', "")});
+  console.log(user)
+   if (user) return res.status(200).json({ error: false, user });
+   else return res.status(200).json({ error: true, message: "nenhuma ficha registrada pelo usuário" });
+});
+
 router.post("/authenticate", async (req, res) => {
   const { email, password } = req.body;
 
@@ -41,8 +51,10 @@ router.post("/authenticate", async (req, res) => {
     return res.status(400).send({ erro: "invalid password" });
 
   user.password = undefined;
-
-  res.send({ user, token: generateToken({ id: user.id }) });
+  const token = generateToken({ id: user.id });
+  await user.updateOne({ token: token });
+  const fichaUser = await ficha.findOne({ email })  
+  res.status(200).send({ error: false, user, token: token, fichaUser });
 });
 
 module.exports = router;

@@ -7,5 +7,6 @@ const ficha = new mongoose.Schema({
   role: { type: String, required: true },
   divinity: { type: String, required: false },
   level: { type: Number, required: true },
+  author: { type: String, required: false },
 });
 module.exports = mongoose.model("ficha", ficha);
